@@ -5,10 +5,6 @@ module.exports = {
 
   construct: function(self, options) {
 
-    if (!options.optimize) {
-      return;
-    }
-
     // This method does not require a callback because it performs its work in
     // the background. It is an optimization and thus does not need to be
     // completed before other actions
@@ -107,6 +103,14 @@ module.exports = {
         });
         return result;
       }
+    };
+
+    self.debug = function(msg) {
+      if (!self.options.debug) {
+        return;
+      }
+      msg = 'apostrophe-optimizer: ' + msg;
+      self.apos.utils.debug.apply(self, [ msg ].concat([].slice.call(arguments, 1)));
     };
 
     self.apos.tasks.add(self.__meta.name, 'reoptimize', 'Reoptimize docs for fewer total database queries.\nShould only be needed once when transitioning to versions of Apostrophe\nthat support this feature. Safe to run again however.', function(apos, argv, callback) {

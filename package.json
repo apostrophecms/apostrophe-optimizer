@@ -23,5 +23,11 @@
   "bugs": {
     "url": "https://github.com/apostrophecms/apostrophe-optimizer/issues"
   },
-  "homepage": "https://github.com/apostrophecms/apostrophe-optimizer#readme"
+  "homepage": "https://github.com/apostrophecms/apostrophe-optimizer#readme",
+  "dependencies": {
+    "async": "^2.6.0",
+    "bluebird": "^3.5.1",
+    "lodash": "^4.17.5",
+    "sift": "^5.1.0"
+  }
 }
