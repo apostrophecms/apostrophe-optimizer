@@ -1,0 +1,27 @@
+{
+  "name": "apostrophe-optimizer",
+  "version": "2.0.0",
+  "description": "Backend database query optimizer for the Apostrophe CMS.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apostrophecms/apostrophe-optimizer.git"
+  },
+  "keywords": [
+    "apostrophe-cms",
+    "apostrophe",
+    "cms"
+  ],
+  "author": "P'unk Avenue LLC",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/apostrophecms/apostrophe-optimizer/issues"
+  },
+  "homepage": "https://github.com/apostrophecms/apostrophe-optimizer#readme"
+}
