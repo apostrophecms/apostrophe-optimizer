@@ -1,5 +1,7 @@
 # apostrophe-optimizer
 
+## In beta. Currently requires the `651` branch of the `apostrophe` module.
+
 ```
 npm install apostrophe-optimizer
 ```
