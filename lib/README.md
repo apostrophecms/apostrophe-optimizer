@@ -42,6 +42,10 @@ When MongoDB is on a separate server, you'll find that the latency makes avoidin
 
 When MongoDB is on the same server, we generally haven't seen a performance improvement. That's because we're asking JavaScript to do the filtering work of MongoDB. Not surprisingly, MongoDB is faster at that... unless it takes time to communicate with MongoDB in the first place.
 
+## Gathering stats on performance *without* the optimizer
+
+You can set the `enable: false` flag to disable the actual optimization, but keep the stats on how much time is being spent in various MongoDB queries.
+
 ## Impacts on your custom code
 
 If your code writes to Apostrophe docs using Apostrophe's APIs, then the prefetched data for those docs is automatically cleared. However, if you update docs directly with MongoDB, this does not happen. So you could get stale data if you query Apostrophe for the object later in that same request (other requests would never be impacted by this issue).

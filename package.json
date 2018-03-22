@@ -28,6 +28,7 @@
     "async": "^2.6.0",
     "bluebird": "^3.5.1",
     "lodash": "^4.17.5",
+    "performance-now": "^2.1.0",
     "sift": "^5.1.0"
   }
 }
