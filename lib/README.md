@@ -21,33 +21,26 @@ modules: {
 }
 ```
 
-```
-# Should only need to do this once, it's automatic on future saves
-node app apostrophe-optimizer:reoptimize
-```
-
 This module accelerates Apostrophe by reducing the number of MongoDB queries.
 
-The module works by remembering the IDs of documents that are fetched via joins and prefetching those documents, rather than carrying out several waves of MongoDB queries. This is possible for about 30-50% of queries on a typical site. The rest pass through MongoDB as usual.
+The module works by noting the simple unique keys (`_id`, `slug`, `path`) used in queries for a given URL, then prefetching documents matching those keys before normal queries in middleware when the URL is next accessed. If a subsequent query provably depends only on the docs in that collection, it is then satisfied within Apostrophe, using the Sift library to implement MongoDB-compatible queries. Otherwise it passes through to MongoDB. Thus this is not a cache, beyond the lifetime of a single `req` at least, and does not lead to issues with stale data under normal circumstances.
 
-To ensure consistent results, the prefetched documents are passed through the `sift` library, which
-can execute the same query syntax as MongoDB. When this cannot be done due to limitations of `sift``,
-MongoDB is queried as a fallback.
+For queries that cannot be handled by `sift`, MongoDB is queried directly.
 
 ## When to use it
 
-When MongoDB is on a separate server, you'll find that the latency makes avoiding queries a big win. When it takes time to communicate with MongoDB, there is a big advantage in using this module.
+When MongoDB is on a separate server, you'll find that the latency makes avoiding queries a big win. When it takes time to communicate with MongoDB, there is a big advantage in using this module. There is also an advantage when using additional Node.js CPU time is cheaper for you than processing additional MongoDB queries.
 
 ## When not to use it
 
-When MongoDB is on the same server, we generally haven't seen a performance improvement. That's because we're asking JavaScript to do the filtering work of MongoDB. Not surprisingly, MongoDB is faster at that... unless it takes time to communicate with MongoDB in the first place.
+When MongoDB is on the same server as Node.js, the performance benefit is smaller (around 10% in our tests), but this may still be worth your while.
+
+And, of course, your mileage may vary. So use the `stats: true` option to check performance.
 
 ## Gathering stats on performance *without* the optimizer
 
-You can set the `enable: false` flag to disable the actual optimization, but keep the stats on how much time is being spent in various MongoDB queries.
+You can set the `enable: false` flag to disable the optimization, but keep `stats: true` to see  how much time is being spent in various MongoDB queries. This makes it easier to profile your site and determine whether this module is a win for your needs.
 
 ## Impacts on your custom code
 
-If your code writes to Apostrophe docs using Apostrophe's APIs, then the prefetched data for those docs is automatically cleared. However, if you update docs directly with MongoDB, this does not happen. So you could get stale data if you query Apostrophe for the object later in that same request (other requests would never be impacted by this issue).
-
-TODO: provide an API to clear the prefetched data for a single doc id or all docs.
+If your code modifies docs using Apostrophe's own APIs, then the prefetched docs are automatically discarded so that efforts to `find` those docs again with Apostrophe in the lifetime of the same `req` will see the updated data. However, if your code modifies docs using low-level MongoDB APIs and expects to see the changes in during that same request lifetime, or expects to see changes *within the lifetime of a single `req`* made by external code, then you will need to set `req.optimize.docs` to `null` before asking Apostrophe to re-fetch a doc.
