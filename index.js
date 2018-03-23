@@ -15,9 +15,9 @@ module.exports = {
         middleware: function(req, res, next) {
           req.optimize = req.optimize || {};
           req.optimize.key = req.url;
-          // chance to modify req.optimizerKey, for instance to take
+          // chance to modify req.optimize.key, for instance to take
           // locales into account
-          self.apos.emit('optimizeKey', req.optimize);
+          self.apos.emit('optimizeKey', req);
           var queries = self.queries[req.optimize.key];
           if (!queries) {
             return next();
