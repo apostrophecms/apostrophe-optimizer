@@ -22,6 +22,7 @@ module.exports = {
           if (!queries) {
             return next();
           }
+          req.optimize.queries = queries;
           var clauses = [];
           _.each(queries, function(values, key) {
             var clause = {};
@@ -31,13 +32,12 @@ module.exports = {
           if (!clauses.length) {
             return next();
           }
-          console.log
           return self.apos.docs.db.find({ $or: clauses }).toArray(function(err, docs) {
             if (err) {
               self.apos.utils.error('apostrophe-optimizer: error prefetching related docs, nonfatal: ', err);
               return next();
             }
-            optimizer.debug('docs retrieved by optimizer: ', _.map(docs, function(doc) {
+            self.debug('docs retrieved by optimizer: ', _.map(docs, function(doc) {
               return _.pick(doc, '_id', 'slug', 'path')
             }));
             req.optimize.docs = docs;
