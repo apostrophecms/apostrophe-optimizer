@@ -159,6 +159,7 @@ describe('apostrophe-optimizer', function() {
       assert(widget._pieces[1].title === 'Camembert #8');
       assert(widget._pieces[1].__optimized);
       assert(!widget._pieces[2]);
+      console.log(apos.optimizer.stats);
     });
   });
 

@@ -1,6 +1,10 @@
 # apostrophe-optimizer
 
-## In beta. Currently requires the `651` branch of the `apostrophe` module.
+## Requirements
+
+Up-to-date 2.x versions of apostrophe and, if you are using it, apostrophe-workflow.
+
+## Installation
 
 ```
 npm install apostrophe-optimizer
@@ -15,7 +19,7 @@ modules: {
     stats: true,
     // Print verbose information about queries that could not be optimized
     // (those not limited to prefetched ids, and those with MongoDB operators
-    // not supported by Swift)
+    // not supported by Swift). DEBUG SLOWS IT DOWN, do NOT leave on during speed tests
     debug: true
   }
 }
@@ -29,7 +33,7 @@ For queries that cannot be handled by `sift`, MongoDB is queried directly.
 
 ## When to use it
 
-When MongoDB is on a separate server, you'll find that the latency makes avoiding queries a big win. When it takes time to communicate with MongoDB, there is a big advantage in using this module. There is also an advantage when using additional Node.js CPU time is cheaper for you than processing additional MongoDB queries.
+When MongoDB is on a separate server, you'll find that the latency makes minimizing consecutive queries a big win. When it takes time to communicate with MongoDB, there is a big advantage in using this module. There is also an advantage when using additional Node.js CPU time is cheaper for you than processing additional MongoDB queries.
 
 When network latency to MongoDB is around 10ms, a speedup between 30% and 50% has been observed. Your mileage may vary; see "gathering stats on performance," below.
 
