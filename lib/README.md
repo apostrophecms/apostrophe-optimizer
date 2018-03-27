@@ -31,11 +31,36 @@ For queries that cannot be handled by `sift`, MongoDB is queried directly.
 
 When MongoDB is on a separate server, you'll find that the latency makes avoiding queries a big win. When it takes time to communicate with MongoDB, there is a big advantage in using this module. There is also an advantage when using additional Node.js CPU time is cheaper for you than processing additional MongoDB queries.
 
+When network latency to MongoDB is around 10ms, a speedup between 30% and 50% has been observed. Your mileage may vary; see "gathering stats on performance," below.
+
 ## When not to use it
 
 When MongoDB is on the same server as Node.js, the performance benefit is smaller (around 10% in our tests), but this may still be worth your while.
 
 And, of course, your mileage may vary. So use the `stats: true` option to check performance.
+
+## Gathering stats on performance
+
+Set `stats` to `true`. **Do not** use `stats` and `debug` at the same time to gather information about the performance of the optimizer, as the debug calls consume quite a bit of time.
+
+## Simulating the latency of real world cloud database hosting
+
+Often MongoDB is on the same server in your dev environment.
+
+To simulate latency, set the `delay` to the number of milliseconds of delay to simulate. Bear in mind this delay is added both "coming" and "going," i.e. before the query goes out and before the response is received, which is a good match for what real world latency does.
+
+For instance:
+
+```
+// in `app.js`
+...
+modules: {
+  'apostrophe-optimizer': {
+    stats: true,
+    delay: 10
+  }
+}
+```
 
 ## Gathering stats on performance *without* the optimizer
 
@@ -43,4 +68,4 @@ You can set the `enable: false` flag to disable the optimization, but keep `stat
 
 ## Impacts on your custom code
 
-If your code modifies docs using Apostrophe's own APIs, then the prefetched docs are automatically discarded so that efforts to `find` those docs again with Apostrophe in the lifetime of the same `req` will see the updated data. However, if your code modifies docs using low-level MongoDB APIs and expects to see the changes in during that same request lifetime, or expects to see changes *within the lifetime of a single `req`* made by external code, then you will need to set `req.optimize.docs` to `null` before asking Apostrophe to re-fetch a doc.
+If your code modifies docs using Apostrophe's own APIs, then the prefetched docs are automatically discarded so that efforts to `find` those docs again with Apostrophe in the lifetime of the same `req` will see the updated data. However, if your code modifies docs using low-level MongoDB APIs and expects to see the changes in during that same request lifetime, or expects to see changes *within the lifetime of a single `req`* made by external code, then you will need to invoke `req.deoptimize()` before asking Apostrophe to re-fetch a doc if you expect to see changes made during the same request.
