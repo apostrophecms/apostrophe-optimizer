@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var now = require('performance-now');
+var Promise = require('bluebird');
 
 module.exports = {
 
