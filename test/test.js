@@ -62,6 +62,20 @@ describe('apostrophe-optimizer', function() {
     });
   });
 
+  it('should not break mongo queries with callbacks', function(done) {
+    return apos.docs.db.find().toArray(function(err, docs) {
+      assert(!err);
+      assert(docs.length > 0);
+      done();
+    });
+  });
+
+  it('should not break mongo queries with promises', function() {
+    return apos.docs.db.find().toArray().then(function(docs) {
+      assert(docs.length > 0);
+    });
+  });
+
   /// ///
   // SETUP
   /// ///
