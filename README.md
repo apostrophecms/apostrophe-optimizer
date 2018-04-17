@@ -73,3 +73,7 @@ You can set the `enable: false` flag to disable the optimization, but keep `stat
 ## Impacts on your custom code
 
 If your code modifies docs using Apostrophe's own APIs, then the prefetched docs are automatically discarded so that efforts to `find` those docs again with Apostrophe in the lifetime of the same `req` will see the updated data. However, if your code modifies docs using low-level MongoDB APIs and expects to see the changes in during that same request lifetime, or expects to see changes *within the lifetime of a single `req`* made by external code, then you will need to invoke `req.deoptimize()` before asking Apostrophe to re-fetch a doc if you expect to see changes made during the same request.
+
+## Tested
+
+Tested with `mocha` and `travis-ci`.
