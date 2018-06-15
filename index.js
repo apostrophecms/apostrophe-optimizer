@@ -7,7 +7,6 @@ module.exports = {
   construct: function(self, options) {
 
     if (self.options.enable !== false) {
-
       self.queries = {};
 
       self.expressMiddleware = {
@@ -49,8 +48,8 @@ module.exports = {
           if (!clauses.length) {
             return next();
           }
-          // console.log(JSON.stringify(clauses, null, '  '));
-          return self.apos.docs.db.find({ $or: clauses }).toArray(function(err, docs) {
+          var query = { $or: clauses };
+          return self.apos.docs.db.find(query).toArray(function(err, docs) {
             if (err) {
               self.apos.utils.error('apostrophe-optimizer: error prefetching related docs, nonfatal: ', err);
               return next();

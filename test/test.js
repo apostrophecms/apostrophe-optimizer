@@ -23,7 +23,14 @@ describe('apostrophe-optimizer', function() {
 
       modules: {
         'apostrophe-pages': {
-          park: [],
+          park: [
+            {
+              type: 'testPage',
+              title: 'Test Page',
+              slug: '/test-page',
+              published: true
+            }
+          ],
           types: [
             {
               name: 'home',
@@ -98,6 +105,33 @@ describe('apostrophe-optimizer', function() {
       body = JSON.parse(body);
       assert(body[0]);
       assert(body[0].slug === '/');
+      assert(body[0].__optimized);
+      assert(body[1]);
+      assert(body[1].slug === 'global');
+      assert(body[1].__optimized);
+    });
+  });
+
+  it('should be able to fetch a subpage the first time', function() {
+    return request('http://localhost:3000/test-page').then(function(body) {
+      assert(body);
+      body = JSON.parse(body);
+      assert(body[0]);
+      assert(body[0].slug === '/test-page');
+      assert(!body[0].__optimized);
+      assert(body[1]);
+      assert(body[1].slug === 'global');
+      assert(!body[1].__optimized);
+    });
+  });
+
+  it('should be able to fetch a subpage a second time, with optimization', function() {
+    return request('http://localhost:3000/test-page').then(function(body) {
+      assert(body);
+      assert(apos.optimizer.stats.optimized > 0);
+      body = JSON.parse(body);
+      assert(body[0]);
+      assert(body[0].slug === '/test-page');
       assert(body[0].__optimized);
       assert(body[1]);
       assert(body[1].slug === 'global');
