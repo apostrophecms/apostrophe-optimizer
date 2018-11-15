@@ -103,12 +103,10 @@ module.exports = {
       };
 
       var superFindWithProjection = self.apos.docs.db.findWithProjection;
-      if (superFind !== superFindWithProjection) {
-        self.apos.docs.db.findWithProjection = function() {
-          var cursor = superFind.apply(this, arguments);
-          return decorateCursorWithStats(cursor);
-        };
-      }
+      self.apos.docs.db.findWithProjection = function() {
+        var cursor = superFindWithProjection.apply(this, arguments);
+        return decorateCursorWithStats(cursor);
+      };
 
       var superAggregate = self.apos.docs.db.aggregate;
       self.apos.docs.db.aggregate = function() {
