@@ -31,16 +31,17 @@ module.exports = {
           _.each(queries, function(query, locale) {
             _.each(query, function(values, key) {
               var clause = {};
-              clause[key] = { $in: values };
+              clause[key] = { $in: _.uniq(values) };
               if (locale !== '__none') {
-                clause.$or = [
-                  {
-                    workflowLocale: locale
-                  },
-                  {
-                    workflowLocale: { $exists: 0 }
-                  }
-                ];
+                if (locale.substring(0, 1) === '=') {
+                  // Exact match, no need to look for docs with no locale
+                  clause.workflowLocale = locale.substring(1);
+                } else {
+                  // Current locale or not locale specific
+                  clause.workflowLocale = {
+                    $in: [ locale, null ]
+                  };
+                }
               }
               clauses.push(clause);
             });
@@ -49,6 +50,7 @@ module.exports = {
             return next();
           }
           var query = { $or: clauses };
+          // console.log(require('util').inspect(query, null, { depth: 20 }));
           return self.apos.docs.db.find(query).toArray(function(err, docs) {
             if (err) {
               self.apos.utils.error('apostrophe-optimizer: error prefetching related docs, nonfatal: ', err);
@@ -93,11 +95,24 @@ module.exports = {
           jsMS: 0
         };
       }
+
       var superFind = self.apos.docs.db.find;
       self.apos.docs.db.find = function() {
         var cursor = superFind.apply(this, arguments);
-        var superToArray = cursor.toArray;
-        cursor.toArray = function(callback) {
+        return decorateCursorWithStats(cursor);
+      };
+
+      var superFindWithProjection = self.apos.docs.db.findWithProjection;
+      if (superFind !== superFindWithProjection) {
+        self.apos.docs.db.findWithProjection = function() {
+          var cursor = superFind.apply(this, arguments);
+          return decorateCursorWithStats(cursor);
+        };
+      }
+
+      function decorateCursorWithStats(cursor) {
+      	var superToArray = cursor.toArray;
+      	cursor.toArray = function(callback) {
           if (self.options.latency) {
             setTimeout(function() {
               if (callback) {
@@ -120,7 +135,9 @@ module.exports = {
               if (err) {
                 return callback(err);
               }
-              self.stats.mongoFindMS += (now() - start);
+              var elapsed = (now() - start);
+              self.stats.mongoFindMS += elapsed;
+     
               self.stats.mongoFindCount++;
               self.statsSoon();
               return callback(null, docs);
@@ -160,6 +177,7 @@ module.exports = {
         };
         return cursor;
       };
+
       var superAggregate = self.apos.docs.db.aggregate;
       self.apos.docs.db.aggregate = function() {
         var cursor = superAggregate.apply(this, arguments);
