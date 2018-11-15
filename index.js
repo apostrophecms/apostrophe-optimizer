@@ -110,74 +110,6 @@ module.exports = {
         };
       }
 
-      function decorateCursorWithStats(cursor) {
-      	var superToArray = cursor.toArray;
-      	cursor.toArray = function(callback) {
-          if (self.options.latency) {
-            setTimeout(function() {
-              if (callback) {
-                return body(callback);
-              } else {
-                return Promise.promisify(body)();
-              }
-              // x2 to simulate latency both coming and going
-            }, self.options.latency * 2 + ((self.options.latency * 2) || 0));
-            return;
-          }
-          if (callback) {
-            return body(callback);
-          } else {
-            return Promise.promisify(body)();
-          }
-          function body(callback) {
-            var start = now();
-            return superToArray.call(cursor, function(err, docs) {
-              if (err) {
-                return callback(err);
-              }
-              var elapsed = (now() - start);
-              self.stats.mongoFindMS += elapsed;
-     
-              self.stats.mongoFindCount++;
-              self.statsSoon();
-              return callback(null, docs);
-            });
-          }
-        };
-        var superCount = cursor.count;
-        cursor.count = function(callback) {
-          if (self.options.latency) {
-            setTimeout(function() {
-              if (callback) {
-                return body(callback);
-              } else {
-                return Promise.promisify(body)();
-              }
-              // x2 to simulate latency both coming and going
-            }, self.options.latency * 2);
-            return;
-          }
-          if (callback) {
-            return body(callback);
-          } else {
-            return Promise.promisify(body)();
-          }
-          function body(callback) {
-            var start = now();
-            return superCount.call(cursor, function(err, count) {
-              if (err) {
-                return callback(err);
-              }
-              self.stats.mongoFindMS += (now() - start) + ((self.options.latency * 2) || 0);
-              self.stats.mongoFindCount++;
-              self.statsSoon();
-              return callback(null, count);
-            });
-          }
-        };
-        return cursor;
-      };
-
       var superAggregate = self.apos.docs.db.aggregate;
       self.apos.docs.db.aggregate = function() {
         var cursor = superAggregate.apply(this, arguments);
@@ -225,5 +157,74 @@ module.exports = {
       };
 
     }
+
+    function decorateCursorWithStats(cursor) {
+      var superToArray = cursor.toArray;
+      cursor.toArray = function(callback) {
+        if (self.options.latency) {
+          setTimeout(function() {
+            if (callback) {
+              return body(callback);
+            } else {
+              return Promise.promisify(body)();
+            }
+            // x2 to simulate latency both coming and going
+          }, self.options.latency * 2 + ((self.options.latency * 2) || 0));
+          return;
+        }
+        if (callback) {
+          return body(callback);
+        } else {
+          return Promise.promisify(body)();
+        }
+        function body(callback) {
+          var start = now();
+          return superToArray.call(cursor, function(err, docs) {
+            if (err) {
+              return callback(err);
+            }
+            var elapsed = (now() - start);
+            self.stats.mongoFindMS += elapsed;
+
+            self.stats.mongoFindCount++;
+            self.statsSoon();
+            return callback(null, docs);
+          });
+        }
+      };
+      var superCount = cursor.count;
+      cursor.count = function(callback) {
+        if (self.options.latency) {
+          setTimeout(function() {
+            if (callback) {
+              return body(callback);
+            } else {
+              return Promise.promisify(body)();
+            }
+            // x2 to simulate latency both coming and going
+          }, self.options.latency * 2);
+          return;
+        }
+        if (callback) {
+          return body(callback);
+        } else {
+          return Promise.promisify(body)();
+        }
+        function body(callback) {
+          var start = now();
+          return superCount.call(cursor, function(err, count) {
+            if (err) {
+              return callback(err);
+            }
+            self.stats.mongoFindMS += (now() - start) + ((self.options.latency * 2) || 0);
+            self.stats.mongoFindCount++;
+            self.statsSoon();
+            return callback(null, count);
+          });
+        }
+      };
+      return cursor;
+    };
+
   }
 };
