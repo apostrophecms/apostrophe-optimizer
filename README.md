@@ -33,15 +33,15 @@ For queries that cannot be handled by `sift`, MongoDB is queried directly.
 
 ## When to use it
 
-When MongoDB is on a separate server, you'll find that the latency makes minimizing consecutive queries a big win. When it takes time to communicate with MongoDB, there is a big advantage in using this module. There is also an advantage when using additional Node.js CPU time is cheaper for you than processing additional MongoDB queries.
+**When MongoDB is on a separate server and there is significant latency between them**, you'll find that the latency makes minimizing consecutive queries a big win. When it takes time to communicate with MongoDB, there is a big advantage in using this module. There is also an advantage when using additional Node.js CPU time is cheaper for you than processing additional MongoDB queries.
 
 When network latency to MongoDB is around 10ms, a speedup between 30% and 50% has been observed. Your mileage may vary; see "gathering stats on performance," below.
 
 ## When not to use it
 
-When MongoDB is on the same server as Node.js, the performance benefit is smaller (around 10% in our tests), but this may still be worth your while.
+When MongoDB is on the same server as Node.js, or latency is very low (think of MongoDB Atlas on the same private network with your webserver), you might not observe any performance benefit. The time that this module spends emulating MongoDB's filtering process may consume more milliseconds than you are saving by avoiding latency. That makes sense because MongoDB's internals are optimized in C++.
 
-And, of course, your mileage may vary. So use the `stats: true` option to check performance.
+In any case, your mileage may vary. So use the `stats: true` option to check performance.
 
 ## Gathering stats on performance
 
@@ -65,6 +65,8 @@ modules: {
   }
 }
 ```
+
+Note that latency in the cloud can be quite low (1ms or perhaps less) if you position your database server on the same private network.
 
 ## Gathering stats on performance *without* the optimizer
 
